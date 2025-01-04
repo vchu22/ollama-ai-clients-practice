@@ -19,14 +19,18 @@ function App() {
   }, []);
 
   return (
-    <ul>
-      {JSONResponse.map((data : {
-          modified_at: string,
-          name: string
-        }) => (
-          <li key={data.modified_at}>{data.name}</li>
-        ))}
-    </ul>
+    <div>
+      <h3>Available Models:</h3>
+      <ul>
+        {JSONResponse.map((data : {
+            modified_at: string,
+            name: string
+          }) => (
+            <li key={data.modified_at}>{data.name}</li>
+          ))}
+      </ul>
+    </div>
+    
   );
 }
 
