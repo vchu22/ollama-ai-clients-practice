@@ -22,16 +22,24 @@ interface ResponseObject {
 }
 
 function App() {
-  const [modelsResponse, setModelsResponse] = useState([]);
+  const [models, setModels] = useState<string[]>([]);
+  const [selectedModel, setSelectedModel] = useState("llama3.2:latest");
   useEffect(() => {
     axios.get(`${rootURL}/api/tags`)
       .then(res => {
-        setModelsResponse(res.data.models);
+        let models = res.data.models.map((model: {
+          modified_at: string,
+          name: string
+        }) => model.name);
+        setModels(models);
       })
       .catch(err => {
         console.error(err);
       });
   }, []);
+  const handleModelChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedModel(event.target.value);
+  };
 
   const [helloResponse, setHelloResponse] = useState<ResponseObject[]>([]);
   useEffect(() => {
@@ -40,7 +48,7 @@ function App() {
       url: `${rootURL}/api/generate`,
       responseType: 'stream',
       data: {
-        model: "llama3.2",
+        model: selectedModel,
         prompt: "Hello"
       }
     })
@@ -56,24 +64,28 @@ function App() {
 
   return (
     <div>
-      <h3>Available Models:</h3>
-      <ul>
-        {modelsResponse.map((data: {
-          modified_at: string,
-          name: string
-        }) => (
-          <li key={data.modified_at}>{data.name}</li>
-        ))}
-      </ul>
-      <ul>
-        {/* {helloResponse} */}
-        {helloResponse.map((data: {
-          created_at: string,
-          done: boolean,
-          model: string,
-          response: string
-        }, i: number) => <li key={i}>{data.response}</li>)}
-      </ul>
+      {models.length == 0 ? "" : (
+        <>
+          <h3>Available Models:</h3>
+          <select
+            defaultValue={selectedModel}
+            onChange={handleModelChange}
+          >
+            {models.map((option: string) => (
+              <option value={option}>{option}</option>
+            ))}
+          </select>
+          <p> <b>Selected Model:</b> {selectedModel}</p>
+
+          <ul>
+            {helloResponse.map((data: {
+              created_at: string,
+              done: boolean,
+              model: string,
+              response: string
+            }, i: number) => <li key={i}>{data.response}</li>)}
+          </ul>
+        </>)}
     </div>
 
   );
